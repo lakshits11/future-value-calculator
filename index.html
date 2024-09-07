@@ -150,51 +150,78 @@
     </div>
 
     <script>
-        document.getElementById('investmentForm').addEventListener('submit', function (ev            
-      event.preventDefault(); // Prevent the form from subm            
-      checkFieldsAndCalcul        );
-        ;
+        document.getElementById('investmentForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting
+            checkFieldsAndCalculate();
+        });
 
-        function checkFieldsAndCalcula            
-      const form = document.getElementById('investmentF            
-      const inputs = form.querySelectorAll('in            
-      let allFieldsFilled =
-        // Check if all fields are filled and highlight empty             
-        inputs.forEach(inpu                       if (!input.va                           input.style.borderColor = input.style.borderWidth = '1                           allFieldsFilled =                        }                            input.style.borderColor = ''; // Reset the border color if                               
+        function checkFieldsAndCalculate() {
+            const form = document.getElementById('investmentForm');
+            const inputs = form.querySelectorAll('input');
+            let allFieldsFilled = true;
 
-        if (allFieldsFil                       calculateFutureVa            
-          }
+            // Check if all fields are filled and highlight empty fields
+            inputs.forEach(input => {
+                if (!input.value) {
+                    input.style.borderColor = 'red'; 
+                    input.style.borderWidth = '1.5px';
+                    allFieldsFilled = false;
+                } else {
+                    input.style.borderColor = ''; // Reset the border color if filled
+                }
+            });
+
+            if (allFieldsFilled) {
+                calculateFutureValue();
+            }
         }
 
-        function calculateFutureVal            
-      const P = parseFloat(document.getElementById('initialCapital').v            
-      const x = parseFloat(document.getElementById('monthlyDeposit').v            
-      const r = parseFloat(document.getElementById('rateOfReturn').value)
-        const i = parseFloat(document.getElementById('inflationRate').value)
-        const z = parseFloat(document.getElementById('increaseRate').value)
-        const t = parseFloat(document.getElementById('years').va            
-      const monthlyRate = r
-        const totalMonths = t
-        let futureValueWithoutInflation = P * Math.pow(1 + monthlyRate, totalMo            
-      const effectiveMonthlyRate = (1 + r / 12) / (1 + i / 12            
-      let futureValueWithInflation = P * Math.pow(1 + effectiveMonthlyRate, totalMo            
-      let totalInvested            
-      for (let year = 1; year <= t; yea                       for (let month = 1; month <= 12; mont                           const n = (year - 1) * 12 +                            const adjustedDeposit = x * Math.pow(1 + z, year                           totalInvested += adjustedDe                           futureValueWithoutInflation += adjustedDeposit * Math.pow(1 + monthlyRate, totalMonths                           futureValueWithInflation += adjustedDeposit * Math.pow(1 + effectiveMonthlyRate, totalMonths                              
-              
-      const returnWithoutInflation = ((futureValueWithoutInflation - totalInvested) / totalInvested)
-        const returnWithInflation = ((futureValueWithInflation - totalInvested) / totalInvested) *
-            document.getElementById('resultWithoutInflation').innerText = `Future Value without Inflation: ${futureValueWithoutInflation.toFixed(2)} (${returnWithoutInflation.toFixed(2            
-      document.getElementById('resultWithInflation').innerText = `Future Value with Inflation: ${futureValueWithInflation.toFixed(2)} (${returnWithInflation.toFixed(2            
-      document.getElementById('totalInvested').innerText = `Total Amount Invested: ${totalInvested.toFixed(
-                // Show r            
-                document.querySelectorAll('.alert').forEach(aler                       alert.style.display = 'b                       alert.style.animation = 'fadeIn 0.5s ease -in            
-           );
+        function calculateFutureValue() {
+            const P = parseFloat(document.getElementById('initialCapital').value);
+            const x = parseFloat(document.getElementById('monthlyDeposit').value);
+            const r = parseFloat(document.getElementById('rateOfReturn').value) / 100;
+            const i = parseFloat(document.getElementById('inflationRate').value) / 100;
+            const z = parseFloat(document.getElementById('increaseRate').value) / 100;
+            const t = parseFloat(document.getElementById('years').value);
+
+            const monthlyRate = r / 12;
+            const totalMonths = t * 12;
+
+            let futureValueWithoutInflation = P * Math.pow(1 + monthlyRate, totalMonths);
+            const effectiveMonthlyRate = (1 + r / 12) / (1 + i / 12) - 1;
+            let futureValueWithInflation = P * Math.pow(1 + effectiveMonthlyRate, totalMonths);
+            let totalInvested = P;
+
+            for (let year = 1; year <= t; year++) {
+                for (let month = 1; month <= 12; month++) {
+                    const n = (year - 1) * 12 + month;
+                    const adjustedDeposit = x * Math.pow(1 + z, year - 1);
+                    totalInvested += adjustedDeposit;
+                    futureValueWithoutInflation += adjustedDeposit * Math.pow(1 + monthlyRate, totalMonths - n);
+                    futureValueWithInflation += adjustedDeposit * Math.pow(1 + effectiveMonthlyRate, totalMonths - n);
+                }
+            }
+
+            const returnWithoutInflation = ((futureValueWithoutInflation - totalInvested) / totalInvested) * 100;
+            const returnWithInflation = ((futureValueWithInflation - totalInvested) / totalInvested) * 100;
+
+            document.getElementById('resultWithoutInflation').innerText = `Future Value without Inflation: ${futureValueWithoutInflation.toFixed(2)} (${returnWithoutInflation.toFixed(2)}%)`;
+            document.getElementById('resultWithInflation').innerText = `Future Value with Inflation: ${futureValueWithInflation.toFixed(2)} (${returnWithInflation.toFixed(2)}%)`;
+            document.getElementById('totalInvested').innerText = `Total Amount Invested: ${totalInvested.toFixed(2)}`;
+
+            // Show results
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.display = 'block';
+                alert.style.animation = 'fadeIn 0.5s ease-in-out';
+            });
         }
 
-        document.getElementById('investmentForm').addEventListener('keydown', function (ev            
-      if (event.key === 'Ent                       event.preventDefa                       checkFieldsAndCalcul            
-          }
-  });
+        document.getElementById('investmentForm').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                checkFieldsAndCalculate();
+            }
+        });
     </script>
 
     <script defer src="/_vercel/insights/script.js"></script>
